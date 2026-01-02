@@ -8,7 +8,7 @@ A lightweight Windows utility that automatically pings enemies while you're aimi
 
 ## How It Works
 
-When you hold the **right mouse button** (aim down sights), the tool automatically presses the **Middle Mouse Button** (ping) for you:
+When you hold the **right mouse button** (aim down sights), the tool automatically presses **Left Control** (ping) for you:
 
 1. **Initial press** — Pings immediately when you start aiming
 2. **Repeat** — Continues to ping every 1 second while you hold right-click
@@ -23,7 +23,7 @@ Only Windows supported.
 
 ### Build from Source
 
-- Requires Go 1.25. Install Go from [golang.org](https://golang.org/dl/).
+- Requires Go 1.25+. Install Go from [golang.org](https://golang.org/dl/).
 - Clone this repository.
 - Run the following command in the terminal:
 
@@ -42,25 +42,14 @@ GOOS=windows GOARCH=amd64 go build -o autoping.exe main.go
 3. Aim at enemies — they get pinged automatically!
 4. Press `Ctrl+C` in the terminal to stop
 
-## Configuration
-
-Edit the constants in `main.go` to customize behavior:
-
-```go
-PingInterval   = 1 * time.Second // Time between pings
-PollRateActive = 50 * time.Millisecond // Polling speed while aiming
-PollRateIdle = 200 * time.Millisecond // Polling speed when idle
-KeyPressDelay = 10 * time.Millisecond // Delay between key press/release
-```
-
 ## Key Bindings
 
-| Action  | Default Key         |
-|---------|---------------------|
-| Trigger | Right Mouse Button  |
-| Ping    | Middle Mouse Button |
+| Action  | Default Key        |
+|---------|--------------------|
+| Trigger | Right Mouse Button |
+| Ping    | Left Control       |
 
-To change keys, modify `VK_RBUTTON` and `VK_MBUTTON` in `main.go` using [Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
+To change keys, modify `VK_RBUTTON` and `VK_LCONTROL` in `main.go` using [Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
 
 ## License
 
