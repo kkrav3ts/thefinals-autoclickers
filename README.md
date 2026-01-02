@@ -9,7 +9,7 @@ A lightweight Windows utility that automatically pings enemies while you're aimi
 ## How It Works
 
 
-When you hold the **right mouse button** (aim down sights), the tool automatically presses the **Left Control** key (ping) for you:
+When you hold the **right mouse button** (aim down sights), the tool automatically presses the **Middle Mouse Button** (ping) for you:
 
 1. **Initial press** — Pings immediately when you start aiming
 2. **Repeat** — Continues to ping every 1 second while you hold right-click
@@ -68,9 +68,9 @@ KeyPressDelay  = 10 * time.Millisecond  // Delay between key press/release
 | Action | Default Key |
 |--------|-------------|
 | Trigger | Right Mouse Button |
-| Ping | Left Control |
+| Ping | Middle Mouse Button |
 
-To change keys, modify `VK_RBUTTON` and `VK_LCONTROL` in `main.go` using [Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
+To change keys, modify `VK_RBUTTON` and `VK_MBUTTON` in `main.go` using [Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
 
 ## License
 
