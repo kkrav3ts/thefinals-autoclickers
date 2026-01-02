@@ -8,7 +8,6 @@ A lightweight Windows utility that automatically pings enemies while you're aimi
 
 ## How It Works
 
-
 When you hold the **right mouse button** (aim down sights), the tool automatically presses the **Middle Mouse Button** (ping) for you:
 
 1. **Initial press** — Pings immediately when you start aiming
@@ -17,25 +16,16 @@ When you hold the **right mouse button** (aim down sights), the tool automatical
 
 This keeps enemies marked without interrupting your aim.
 
-## Features
-
-- 🎯 Auto-ping while aiming
-- ⚡ Adaptive polling (low CPU when idle)
-- 🛑 Graceful shutdown with `Ctrl+C`
-- ⚙️ Configurable timing
-
-## Requirements
-
-- Windows OS
-- Go 1.18+ (for building)
-
-## Installation
-
-### Download Pre-built Binary
+## Download
 
 Download the latest release from the [Releases](../../releases) page.
+Only Windows supported.
 
 ### Build from Source
+
+- Requires Go 1.25. Install Go from [golang.org](https://golang.org/dl/).
+- Clone this repository.
+- Run the following command in the terminal:
 
 ```bash
 # On Windows
@@ -57,22 +47,21 @@ GOOS=windows GOARCH=amd64 go build -o autoping.exe main.go
 Edit the constants in `main.go` to customize behavior:
 
 ```go
-PingInterval   = 1 * time.Second      // Time between pings
-PollRateActive = 50 * time.Millisecond  // Polling speed while aiming
-PollRateIdle   = 200 * time.Millisecond // Polling speed when idle
-KeyPressDelay  = 10 * time.Millisecond  // Delay between key press/release
+PingInterval   = 1 * time.Second // Time between pings
+PollRateActive = 50 * time.Millisecond // Polling speed while aiming
+PollRateIdle = 200 * time.Millisecond // Polling speed when idle
+KeyPressDelay = 10 * time.Millisecond // Delay between key press/release
 ```
 
 ## Key Bindings
 
-| Action | Default Key |
-|--------|-------------|
-| Trigger | Right Mouse Button |
-| Ping | Middle Mouse Button |
+| Action  | Default Key         |
+|---------|---------------------|
+| Trigger | Right Mouse Button  |
+| Ping    | Middle Mouse Button |
 
 To change keys, modify `VK_RBUTTON` and `VK_MBUTTON` in `main.go` using [Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
 
 ## License
 
 MIT
-
