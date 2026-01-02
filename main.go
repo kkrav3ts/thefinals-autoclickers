@@ -19,6 +19,9 @@ const (
 	VK_RBUTTON      = 0x02
 	VK_LCONTROL     = 0xA2
 	KEYEVENTF_KEYUP = 0x0002
+
+	PingInterval = 1 * time.Second
+	PollRate     = 100 * time.Millisecond
 )
 
 func isKeyPressed(vk int) bool {
@@ -35,24 +38,22 @@ func main() {
 	fmt.Printf("THE FINALS Auto-Ping %s\n", Version)
 
 	var pressed bool
-	var t time.Time
+	var lastPing time.Time
 
 	for {
-		state := isKeyPressed(VK_RBUTTON)
-
-		if state {
+		if isKeyPressed(VK_RBUTTON) {
 			if !pressed {
 				pressed = true
-				t = time.Now()
+				lastPing = time.Now()
 				pressKey(VK_LCONTROL)
-			} else if time.Since(t) >= 1*time.Second {
+			} else if time.Since(lastPing) >= PingInterval {
 				pressKey(VK_LCONTROL)
-				t = time.Now()
+				lastPing = time.Now()
 			}
 		} else {
 			pressed = false
 		}
 
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(PollRate)
 	}
 }
