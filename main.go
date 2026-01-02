@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"unsafe"
 )
 
 // Version is set at build time via -ldflags
@@ -16,8 +15,8 @@ var Version = "dev"
 
 var (
 	user32           = syscall.NewLazyDLL("user32.dll")
-	sendInput        = user32.NewProc("SendInput")
 	getAsyncKeyState = user32.NewProc("GetAsyncKeyState")
+	keybd_event      = user32.NewProc("keybd_event")
 )
 
 // Virtual-Key Codes
@@ -27,9 +26,8 @@ const (
 	VK_LCONTROL = 0xA2 // Left Control key
 )
 
-// SendInput constants
+// keybd_event flags
 const (
-	INPUT_KEYBOARD  = 1
 	KEYEVENTF_KEYUP = 0x0002
 )
 
@@ -40,37 +38,14 @@ const (
 	PollRateIdle   = 200 * time.Millisecond // Slow polling when idle
 )
 
-// Windows API structures for SendInput
-type keyboardInput struct {
-	Vk        uint16
-	Scan      uint16
-	Flags     uint32
-	Time      uint32
-	ExtraInfo uintptr
-}
-
-type input struct {
-	Type uint32
-	_    [8 - unsafe.Sizeof(uint32(0))]byte // Padding for 64-bit alignment
-	Ki   keyboardInput
-}
-
 func isKeyPressed(vk int) bool {
 	ret, _, _ := getAsyncKeyState.Call(uintptr(vk))
 	return ret&0x8000 != 0
 }
 
 func pressKey(vk int) {
-	var inp input
-	inp.Type = INPUT_KEYBOARD
-	inp.Ki.Vk = uint16(vk)
-
-	// Key down
-	sendInput.Call(1, uintptr(unsafe.Pointer(&inp)), uintptr(unsafe.Sizeof(inp)))
-
-	// Key up
-	inp.Ki.Flags = KEYEVENTF_KEYUP
-	sendInput.Call(1, uintptr(unsafe.Pointer(&inp)), uintptr(unsafe.Sizeof(inp)))
+	keybd_event.Call(uintptr(vk), 0, 0, 0)
+	keybd_event.Call(uintptr(vk), 0, uintptr(KEYEVENTF_KEYUP), 0)
 }
 
 func main() {
