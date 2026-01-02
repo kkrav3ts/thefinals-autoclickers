@@ -1,6 +1,6 @@
 # THE FINALS Auto-Ping
 
-A lightweight Windows utility that automatically pings enemies while you're aiming in THE FINALS.
+A lightweight Windows utility that automatically pings enemies while you're aiming in THE FINALS. It greatly improves communication within the team and helps you win more games even in solo queue.
 
 ## Demo
 
