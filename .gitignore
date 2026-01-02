@@ -1,0 +1,27 @@
+.*.sw?
+.idea
+terragrunt.iml
+vendor
+.terraform
+.vscode
+*.tfstate
+*.tfstate.backup
+*.out
+.terragrunt-cache
+.bundle
+.ruby-version
+.terraform.lock.hcl
+terragrunt
+.DS_Store
+.go-version
+.terragrunt-stack
+.devcontainer.json
+.cursor/
+.env
+.licensei.cache
+bin
+
+# Windows code signing resources
+rsrc.syso
+resource.syso
+*.syso
