@@ -4,9 +4,10 @@ A lightweight Windows utility that automatically pings enemies while you're aimi
 
 ## Demo
 
-![Demo](https://mega.nz/file/HAkhTDoL#wBM_UsUOGstqJxxXAwM2I_bOPXSFN_ROHxk1M2rUaYw)
+![Demo](https://github.com/user-attachments/assets/bff17d8c-ceb6-458f-b3ba-b447ce5a8e2a)
 
 ## How It Works
+
 
 When you hold the **right mouse button** (aim down sights), the tool automatically presses the **Left Control** key (ping) for you:
 
