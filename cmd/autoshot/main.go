@@ -10,12 +10,6 @@ import (
 	"time"
 )
 
-var (
-	user32           = syscall.NewLazyDLL("user32.dll")
-	getAsyncKeyState = user32.NewProc("GetAsyncKeyState")
-	keybdEvent       = user32.NewProc("keybd_event")
-)
-
 // IsKeyPressed returns true if the specified virtual key is currently pressed.
 func IsKeyPressed(vk int) bool {
 	ret, _, _ := getAsyncKeyState.Call(uintptr(vk))
