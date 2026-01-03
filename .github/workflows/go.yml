@@ -34,12 +34,12 @@ jobs:
       - name: Build autoping
         shell: bash
         run: |
-          GOOS=windows GOARCH=amd64 go build -o autoping-${{ steps.version.outputs.VERSION }}.exe ./cmd/autoping
+          GOOS=windows GOARCH=amd64 go build -o thefinals-autoping-${{ steps.version.outputs.VERSION }}.exe ./cmd/autoping
 
       - name: Build autoshot
         shell: bash
         run: |
-          GOOS=windows GOARCH=amd64 go build -o autoshot-${{ steps.version.outputs.VERSION }}.exe ./cmd/autoshot
+          GOOS=windows GOARCH=amd64 go build -o thefinals-autoshot-${{ steps.version.outputs.VERSION }}.exe ./cmd/autoshot
 
       - name: Upload autoping artifact
         uses: actions/upload-artifact@v6
