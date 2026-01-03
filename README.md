@@ -44,16 +44,16 @@ For developers who want to compile from source:
 
 ```bash
 # Windows
-go build -o autoping.exe main.go
+go build -o autoping.exe ./cmd/autoping
 
 # macOS / Linux (cross-compile)
-GOOS=windows GOARCH=amd64 go build -o autoping.exe main.go
+GOOS=windows GOARCH=amd64 go build -o autoping.exe ./cmd/autoping
 ```
 
 **Customization:** 
-- To change the aim trigger key, modify the `aimKey` variable in `main.go` (line 80). Default is `0x02` (Right Mouse Button).
-- The ping key is selected at runtime, but you can modify the `keyNames` map to add/remove supported keys.
-- Timing intervals can be adjusted in the `main()` function (lines 83-85).
+- To change the aim trigger key, modify the `aimKey` variable in `cmd/autoping/main.go`. Default is `0x02` (Right Mouse Button).
+- The ping key is selected at runtime, but you can modify the `KeyNames` map in `internal/keyboard/keyboard.go` to add/remove supported keys.
+- Timing intervals can be adjusted in the `main()` function in `cmd/autoping/main.go`.
 
 See [Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes) for reference.
 
