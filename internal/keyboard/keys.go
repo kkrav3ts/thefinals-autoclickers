@@ -1,3 +1,5 @@
+//go:build windows
+
 package keyboard
 
 import "fmt"
@@ -33,10 +35,26 @@ var keyNames = map[int]string{
 	0xDB: "[", 0xDC: "\\", 0xDD: "]", 0xDE: "'",
 }
 
+// supportedKeys is a pre-computed slice of supported key codes for faster iteration.
+var supportedKeys []int
+
+func init() {
+	supportedKeys = make([]int, 0, len(keyNames))
+	for vk := range keyNames {
+		supportedKeys = append(supportedKeys, vk)
+	}
+}
+
 // GetKeyName returns a human-readable name for a virtual key code.
 func GetKeyName(vk int) string {
 	if name, ok := keyNames[vk]; ok {
 		return name
 	}
 	return fmt.Sprintf("Key 0x%02X", vk)
+}
+
+// IsSupportedKey returns true if the virtual key code is in the supported keys list.
+func IsSupportedKey(vk int) bool {
+	_, ok := keyNames[vk]
+	return ok
 }

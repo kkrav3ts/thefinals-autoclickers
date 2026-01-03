@@ -1,3 +1,5 @@
+//go:build windows
+
 // Package keyboard provides Windows keyboard input handling via user32.dll.
 package keyboard
 
@@ -30,11 +32,11 @@ func PressKey(vk int) {
 	keybdEvent.Call(uintptr(vk), 0, uintptr(keyEventFKeyUp), 0)
 }
 
-// WaitForKeyRelease waits until all keys are released.
+// WaitForKeyRelease waits until all supported keys are released.
 func WaitForKeyRelease() {
 	for {
 		anyPressed := false
-		for vk := 0x08; vk <= 0xFE; vk++ {
+		for _, vk := range supportedKeys {
 			if IsKeyPressed(vk) {
 				anyPressed = true
 				break
@@ -53,23 +55,42 @@ func DetectKeyPress() int {
 		// Wait for all keys to be released first
 		WaitForKeyRelease()
 
-		// Now wait for a key press (skip mouse buttons 0x01-0x07)
-		var pressedKey int
-		for pressedKey == 0 {
-			for vk := 0x08; vk <= 0xFE; vk++ {
+		// Wait for a supported key press
+		for {
+			for _, vk := range supportedKeys {
 				if IsKeyPressed(vk) {
-					pressedKey = vk
-					break
+					return vk
 				}
 			}
 			time.Sleep(50 * time.Millisecond)
 		}
+	}
+}
 
-		// Check if the key is supported
-		if _, ok := keyNames[pressedKey]; ok {
-			return pressedKey
+// DetectAnyKeyPress waits for any key press and returns true if it's supported.
+// Returns the virtual key code and whether it's a supported key.
+func DetectAnyKeyPress() (vk int, supported bool) {
+	WaitForKeyRelease()
+
+	// Scan all possible keys (0x08-0xFE, skipping mouse buttons)
+	for {
+		for k := 0x08; k <= 0xFE; k++ {
+			if IsKeyPressed(k) {
+				return k, IsSupportedKey(k)
+			}
 		}
+		time.Sleep(50 * time.Millisecond)
+	}
+}
 
-		fmt.Printf("Key 0x%02X is not supported. Please press another key: ", pressedKey)
+// PromptForKey prompts the user and waits for a supported key press.
+// Keeps prompting if an unsupported key is pressed.
+func PromptForKey() int {
+	for {
+		vk, supported := DetectAnyKeyPress()
+		if supported {
+			return vk
+		}
+		fmt.Printf("Key 0x%02X is not supported. Please press another key: ", vk)
 	}
 }

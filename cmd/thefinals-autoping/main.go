@@ -1,3 +1,5 @@
+//go:build windows
+
 // Package main provides an auto-ping utility for THE FINALS.
 // It automatically presses the ping key while aiming (holding right mouse button).
 package main
@@ -28,7 +30,7 @@ func main() {
 
 	// Prompt user to select ping key
 	fmt.Print("Press the key you want to use for ping: ")
-	pingKey := keyboard.DetectKeyPress()
+	pingKey := keyboard.PromptForKey()
 	fmt.Printf("%s\n", keyboard.GetKeyName(pingKey))
 	fmt.Println()
 
@@ -48,23 +50,30 @@ func main() {
 		os.Exit(0)
 	}()
 
-	var pressed bool
-	var lastPing time.Time
+	// Use ticker for accurate ping interval timing
+	pingTicker := time.NewTicker(PingInterval)
+	defer pingTicker.Stop()
+
+	var aiming bool
 
 	for {
 		if keyboard.IsKeyPressed(keyboard.VK_RBUTTON) {
-			if !pressed {
-				pressed = true
-				lastPing = time.Now()
+			if !aiming {
+				// Just started aiming - ping immediately
+				aiming = true
 				keyboard.PressKey(pingKey)
-			} else if time.Since(lastPing) >= PingInterval {
-				keyboard.PressKey(pingKey)
-				lastPing = time.Now()
+				pingTicker.Reset(PingInterval)
 			}
-			time.Sleep(PollRateActive) // Fast polling when aiming
+			// Check ticker for subsequent pings
+			select {
+			case <-pingTicker.C:
+				keyboard.PressKey(pingKey)
+			default:
+			}
+			time.Sleep(PollRateActive)
 		} else {
-			pressed = false
-			time.Sleep(PollRateIdle) // Slow polling when idle
+			aiming = false
+			time.Sleep(PollRateIdle)
 		}
 	}
 }
