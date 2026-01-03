@@ -64,9 +64,3 @@ See [Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/
 ## 💬 Feedback & Suggestions
 
 Have an idea or found a bug? Feel free to [open an issue](../../issues) or contact me directly.
-
----
-
-## 📄 License
-
-MIT
