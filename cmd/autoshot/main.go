@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	fmt.Println("THE FINALS Auto-Shooting Tool. Built by Bykang.")
+	fmt.Println("THE FINALS Auto-Shooting Tool.")
 
 	// PREDEFINED INPUTSl
 	leftMouseButton := 0x01 // Virtual-Key Code for Left Mouse Button used as shooting key.

@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	fmt.Println("THE FINALS Auto-Ping Tool. Built by Bykang.")
+	fmt.Println("THE FINALS Auto-Ping Tool.")
 
 	// PREDEFINED INPUTS
 	aimKey := 0x02 // Virtual-Key Code for Right Mouse Button used as aiming key.
