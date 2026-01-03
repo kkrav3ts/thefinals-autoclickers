@@ -36,8 +36,6 @@ Automatically ping enemies while aiming in THE FINALS. Improve team communicatio
 
 > **Note:** When you first run the tool, it will prompt you to press the key you want to use for pinging. Make sure this matches your in-game ping key binding.
 
----
-
 ## 🛠️ Advanced: Build from Source
 
 For developers who want to compile from source:
@@ -58,8 +56,6 @@ GOOS=windows GOARCH=amd64 go build -o autoping.exe main.go
 - Timing intervals can be adjusted in the `main()` function (lines 83-85).
 
 See [Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes) for reference.
-
----
 
 ## 💬 Feedback & Suggestions
 
