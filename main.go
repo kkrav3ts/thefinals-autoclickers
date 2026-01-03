@@ -69,7 +69,7 @@ func PressKey(vk int) {
 }
 
 func main() {
-	fmt.Println("THE FINALS Auto-Ping Tool. Build by Bykang.")
+	fmt.Println("THE FINALS Auto-Ping Tool. Built by Bykang.")
 
 	// Prompt user to select ping key.
 	fmt.Printf("Press the key you want to use for ping.\n")
