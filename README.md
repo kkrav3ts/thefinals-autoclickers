@@ -1,8 +1,9 @@
-# THE FINALS Auto-Ping
+# THE FINALS Auto-Clicker
 
 Automatically ping enemies while aiming in THE FINALS. Improve team communication and win more games — even in solo queue.
 
-![Demo](https://github.com/user-attachments/assets/bff17d8c-ceb6-458f-b3ba-b447ce5a8e2a)
+![Ping](https://github.com/user-attachments/assets/bff17d8c-ceb6-458f-b3ba-b447ce5a8e2a)
+![Shoot](https://github.com/user-attachments/assets/9637f8b4-4a63-41e1-90ed-ceec852d2446)
 
 ## ✨ Features
 
