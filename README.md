@@ -19,14 +19,22 @@ Automatically ping enemies while aiming in THE FINALS. Improve team communicatio
 
 > **Note:** Windows only.
 
-## ⚙️ Default Controls
+## 📖 Usage
+
+1. Run the executable
+2. When prompted, press the key you want to use for pinging (this should match your in-game ping key)
+3. The tool will confirm which key was selected
+4. Hold right-click (aim) in-game to automatically ping enemies every second
+5. Press `Ctrl+C` or close the window to exit
+
+## ⚙️ Controls
 
 | Action  | Key                |
 |---------|--------------------|
 | Trigger | Right Mouse Button |
-| Ping    | Left Control       |
+| Ping    | User Selected      |
 
-> **Tip:** Make sure your in-game ping key is set to Left Control.
+> **Note:** When you first run the tool, it will prompt you to press the key you want to use for pinging. Make sure this matches your in-game ping key binding.
 
 ---
 
@@ -44,7 +52,12 @@ go build -o autoping.exe main.go
 GOOS=windows GOARCH=amd64 go build -o autoping.exe main.go
 ```
 
-**Customization:** Edit `VK_RBUTTON` and `VK_LCONTROL` in `main.go` to change key bindings. See [Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes) for reference.
+**Customization:** 
+- To change the aim trigger key, modify the `aimKey` variable in `main.go` (line 80). Default is `0x02` (Right Mouse Button).
+- The ping key is selected at runtime, but you can modify the `keyNames` map to add/remove supported keys.
+- Timing intervals can be adjusted in the `main()` function (lines 83-85).
+
+See [Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes) for reference.
 
 ---
 
