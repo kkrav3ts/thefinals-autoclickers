@@ -34,7 +34,7 @@ jobs:
         run: |
           GOOS=windows GOARCH=amd64 go build \
             -ldflags="-X 'main.Version=${{ steps.version.outputs.VERSION }}'" \
-            -o autoping-${{ steps.version.outputs.VERSION }}.exe .
+            -o autoping-${{ steps.version.outputs.VERSION }}.exe ./cmd/thefinals-autoping
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
