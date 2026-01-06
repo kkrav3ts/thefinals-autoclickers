@@ -20,7 +20,7 @@ func main() {
 	delaysCount := 1000     // number of delays to generate
 	mean := 60.0            // midpoint of delay cluster
 	stdDev := 5.0           // standard deviation to create the delay cluster
-	minVal := 50.0          // minimum delay
+	minVal := 40.0          // minimum delay
 	maxVal := 80.0          // maximum delay
 
 	// USER-BASED INPUT
@@ -56,7 +56,7 @@ func main() {
 			delayIndex = (delayIndex + 1) % len(delays)
 		} else {
 			// Small polling delay to avoid excessive CPU usage when idle
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(10 * time.Millisecond)
 		}
 	}
 }

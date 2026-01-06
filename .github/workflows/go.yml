@@ -41,6 +41,11 @@ jobs:
         run: |
           GOOS=windows GOARCH=amd64 go build -o thefinals-autoshot-${{ steps.version.outputs.VERSION }}.exe ./cmd/autoshot
 
+      - name: Build delayChecker
+        shell: bash
+        run: |
+          GOOS=windows GOARCH=amd64 go build -o thefinals-delayChecker-${{ steps.version.outputs.VERSION }}.exe ./cmd/delayChecker
+
       - name: Upload autoping artifact
         uses: actions/upload-artifact@v6
         with:
@@ -53,6 +58,12 @@ jobs:
           name: autoshot-windows-amd64
           path: thefinals-autoshot-${{ steps.version.outputs.VERSION }}.exe
 
+      - name: Upload delayChecker artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: delayChecker-windows-amd64
+          path: thefinals-delayChecker-${{ steps.version.outputs.VERSION }}.exe
+
       - name: Upload to Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
@@ -60,5 +71,6 @@ jobs:
           files: |
             thefinals-autoping-${{ steps.version.outputs.VERSION }}.exe
             thefinals-autoshot-${{ steps.version.outputs.VERSION }}.exe
+            lmb-delays-checker-${{ steps.version.outputs.VERSION }}.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

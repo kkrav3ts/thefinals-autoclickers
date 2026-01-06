@@ -2,6 +2,7 @@ package keyboard
 
 import (
 	"fmt"
+	"runtime"
 	"syscall"
 	"time"
 )
@@ -38,40 +39,6 @@ var KeyNames = map[int]string{
 	0xDB: "[", 0xDC: "\\", 0xDD: "]", 0xDE: "'",
 }
 
-// CheckLMKDelay prints delay between Left Mouse Press and Release
-func CheckLMKDelay() {
-	// Left mouse button virtual key code
-	leftMouseButton := 0x01 // VK_LBUTTON
-
-	var isPressed bool
-	var pressTime time.Time
-
-	fmt.Println("Monitoring left mouse button clicks...")
-	fmt.Println("Press and release the left mouse button to see the delay.")
-
-	// Poll for mouse button state changes
-	for {
-		currentState := IsKeyPressed(leftMouseButton)
-
-		// Detect button press (transition from not pressed to pressed)
-		if currentState && !isPressed {
-			pressTime = time.Now()
-			isPressed = true
-		}
-
-		// Detect button release (transition from pressed to not pressed)
-		if !currentState && isPressed {
-			releaseTime := time.Now()
-			delay := releaseTime.Sub(pressTime)
-			fmt.Printf("Click delay: %d ms\n", delay.Milliseconds())
-			isPressed = false
-		}
-
-		// Small delay to avoid excessive CPU usage
-		time.Sleep(10 * time.Millisecond)
-	}
-}
-
 // IsKeyPressed returns true if the specified virtual key is currently pressed.
 func IsKeyPressed(vk int) bool {
 	ret, _, _ := getAsyncKeyState.Call(uintptr(vk))
@@ -103,4 +70,85 @@ func PressKey(vk int, delay time.Duration) {
 	// Release Key
 	keyEventFKeyUp := 0x0002
 	_, _, _ = keybdEvent.Call(uintptr(vk), 0, uintptr(keyEventFKeyUp), 0)
+}
+
+// ====== DELAY CHECKER ======
+var (
+	winmm           = syscall.NewLazyDLL("winmm.dll")
+	timeBeginPeriod = winmm.NewProc("timeBeginPeriod")
+	timeEndPeriod   = winmm.NewProc("timeEndPeriod")
+)
+
+// setHighResTimer sets Windows timer resolution to 1ms for accurate Sleep calls.
+// Returns a cleanup function that should be deferred.
+func setHighResTimer() func() {
+	timeBeginPeriod.Call(1)
+	return func() {
+		timeEndPeriod.Call(1)
+	}
+}
+
+// CheckLMKDelay prints delay between Left Mouse Press and Release, and between consecutive presses.
+// Uses high-resolution timing and optimized polling for accurate measurements.
+func CheckLMKDelay() {
+	// Lock this goroutine to a single OS thread to prevent scheduling jitter
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
+	// Set Windows timer resolution to 1ms (default is ~15.6ms)
+	cleanup := setHighResTimer()
+	defer cleanup()
+
+	// Left mouse button virtual key code
+	const leftMouseButton = 0x01 // VK_LBUTTON
+
+	var isPressed bool
+	var pressTime time.Time
+	var lastPressTime time.Time
+	var clickCount int
+
+	fmt.Println("Monitoring left mouse button clicks (high-precision mode)...")
+	fmt.Println("Press and release the left mouse button to see delays.")
+	// Pre-fetch the key state check to reduce syscall overhead in hot path	fmt.Println()
+	checkKey := func() bool {
+		ret, _, _ := getAsyncKeyState.Call(uintptr(leftMouseButton))
+		return ret&0x8000 != 0
+	}
+
+	// Poll for mouse button state changes
+	for {
+		currentState := checkKey()
+
+		// Detect button press (transition from not pressed to pressed)
+		if currentState && !isPressed {
+			pressTime = time.Now()
+			isPressed = true
+			clickCount++
+
+			// Calculate interval between presses (if not the first press)
+			if !lastPressTime.IsZero() {
+				interval := pressTime.Sub(lastPressTime)
+				fmt.Printf("[Click #%d] Interval since last press: %d ms (%.2f ms)\n",
+					clickCount, interval.Milliseconds(), float64(interval.Microseconds())/1000.0)
+			} else {
+				fmt.Printf("[Click #%d] First press detected\n", clickCount)
+			}
+		}
+
+		// Detect button release (transition from pressed to not pressed)
+		if !currentState && isPressed {
+			releaseTime := time.Now()
+			holdDuration := releaseTime.Sub(pressTime)
+			fmt.Printf("[Click #%d] Hold duration: %d ms (%.2f ms)\n",
+				clickCount, holdDuration.Milliseconds(), float64(holdDuration.Microseconds())/1000.0)
+			fmt.Println()
+
+			lastPressTime = pressTime // Save for next interval calculation
+			isPressed = false
+		}
+
+		// Minimal sleep to balance CPU usage and accuracy
+		// With timeBeginPeriod(1), this actually sleeps ~1ms instead of ~15ms
+		time.Sleep(500 * time.Microsecond)
+	}
 }
