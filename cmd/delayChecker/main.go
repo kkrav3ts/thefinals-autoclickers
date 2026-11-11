@@ -1,24 +1,24 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"os/signal"
-	"syscall"
 
-	"github.com/kkrav3ts/thefinals-autoping/internal/keyboard"
+	"github.com/kkrav3ts/thefinals-autoclickers/internal/app"
+	"github.com/kkrav3ts/thefinals-autoclickers/internal/keyboard"
 )
 
 func main() {
-	// Graceful shutdown on Ctrl+C
-	fmt.Println("Close window or press Ctrl+C to exit")
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	fmt.Println("THE FINALS Delay Checker.")
+	fmt.Println("Close the window or press Ctrl+C to exit.")
 
-	go func() {
-		<-sigChan
-		fmt.Println("\nExiting...")
-		os.Exit(0)
-	}()
-	keyboard.CheckLMKDelay()
+	var runErr error
+	app.Run(func(ctx context.Context) {
+		runErr = keyboard.CheckLMKDelay(ctx)
+	})
+	if runErr != nil && runErr != context.Canceled {
+		fmt.Fprintln(os.Stderr, runErr)
+		os.Exit(1)
+	}
 }

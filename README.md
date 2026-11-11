@@ -69,6 +69,12 @@ Level up your gameplay with smart automation. Three lightweight tools designed f
 2. **Press** the keyboard key you use for pinging in-game (e.g., `Z` or `X`)
 3. **Play!** Hold right-click (aim) and enemies get pinged automatically
 
+Optional flags tune the rhythm without rebuilding. Defaults match the previous release: a ping about once a second, plus 70–100ms of jitter.
+
+```bash
+thefinals-autoping.exe -interval 1s -hold 10ms -mean 80 -stddev 5 -min 70 -max 100
+```
+
 | Action  | Key                      |
 |---------|--------------------------|
 | Trigger | Right Mouse Button (Aim) |
@@ -97,6 +103,12 @@ This tool requires a quick one-time setup in your game settings:
 - **Hold Left Mouse Button** to shoot — the tool rapidly presses your mapped key
 - Release to stop shooting
 
+Each click holds the key for one random sample, then waits for a second sample. Defaults stay in the 50–80ms band. Raise `-min` and `-max` if a patch gives a weapon a slower fire rate, or lower them if your clicks are not keeping up.
+
+```bash
+thefinals-autoshot.exe -mean 60 -stddev 5 -min 50 -max 80
+```
+
 | Action  | Key                      |
 |---------|--------------------------|
 | Trigger | Left Mouse Button (Hold) |
@@ -113,11 +125,14 @@ This tool requires a quick one-time setup in your game settings:
 3. **See** the click duration displayed in milliseconds
 
 ```
-Monitoring left mouse button clicks...
-Press and release the left mouse button to see the delay.
-Click delay: 87 ms
-Click delay: 112 ms
-Click delay: 95 ms
+Monitoring left mouse button clicks (high-precision mode)...
+Press and release the left mouse button to see delays.
+
+[Click #1] First press detected
+[Click #1] Hold duration: 87.40 ms (avg 87.40 ms)
+
+[Click #2] Interval since last press: 190.20 ms (avg 190.20 ms)
+[Click #2] Hold duration: 95.10 ms (avg 91.25 ms)
 ```
 
 > **Tip:** Use this to understand your natural click timing before configuring Auto-Shot!
@@ -126,7 +141,7 @@ Click delay: 95 ms
 
 ## ✅ Safe to Use
 
-All tools are **external** and work by monitoring/simulating keyboard inputs. They:
+All tools are **external** and work by monitoring keyboard state and synthesizing keystrokes with `SendInput`. They:
 
 - ❌ Do NOT read game memory
 - ❌ Do NOT modify game files
@@ -139,7 +154,7 @@ All tools are **external** and work by monitoring/simulating keyboard inputs. Th
 
 For developers who want to compile from source:
 
-**Requirements:** [Go 1.25+](https://golang.org/dl/)
+**Requirements:** [Go 1.26+](https://golang.org/dl/)
 
 ```bash
 # Build Auto-Ping

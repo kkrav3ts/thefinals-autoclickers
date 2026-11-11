@@ -1,70 +1,101 @@
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
-	"github.com/kkrav3ts/thefinals-autoping/internal/keyboard"
-	"github.com/kkrav3ts/thefinals-autoping/internal/statistics"
+	"github.com/kkrav3ts/thefinals-autoclickers/internal/app"
+	"github.com/kkrav3ts/thefinals-autoclickers/internal/keyboard"
+	"github.com/kkrav3ts/thefinals-autoclickers/internal/timing"
 )
 
 func main() {
+	interval := flag.Duration("interval", time.Second, "time between pings while aiming")
+	hold := flag.Duration("hold", 10*time.Millisecond, "how long the ping key is held")
+	mean := flag.Float64("mean", 80, "extra jitter around each ping, in milliseconds")
+	stdDev := flag.Float64("stddev", 5, "jitter standard deviation, in milliseconds")
+	minVal := flag.Float64("min", 70, "minimum jitter, in milliseconds")
+	maxVal := flag.Float64("max", 100, "maximum jitter, in milliseconds")
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: thefinals-autoping [flags]\n\nHold right mouse button to tap the ping key you select.\n\n")
+		flag.PrintDefaults()
+	}
+	flag.Parse()
+
+	if *interval < 0 || *hold < 0 {
+		fmt.Fprintln(os.Stderr, "interval and hold must be zero or positive")
+		os.Exit(2)
+	}
+
 	fmt.Println("THE FINALS Auto-Ping Tool.")
+	fmt.Printf("Ping spacing %s, hold %s, jitter mean %.0fms (%.0f–%.0fms).\n", *interval, *hold, *mean, *minVal, *maxVal)
+	fmt.Println("Press the key you want to use for ping.")
 
-	// PREDEFINED INPUTS
-	aimKey := 0x02 // Virtual-Key Code for Right Mouse Button used as aiming key.
-	PollRateActive := 10 * time.Millisecond
-	PollRateIdle := 200 * time.Millisecond
-	delaysCount := 500
-	mean := 80.0
-	stdDev := 5.0
-	minVal := 70.0
-	maxVal := 100.0
+	var runErr error
+	app.Run(func(ctx context.Context) {
+		runErr = loop(ctx, *interval, *hold, *mean, *stdDev, *minVal, *maxVal)
+	})
+	if runErr != nil && runErr != context.Canceled {
+		fmt.Fprintln(os.Stderr, runErr)
+		os.Exit(1)
+	}
+}
 
-	// USER-BASED INPUT
-	fmt.Printf("Press the key you want to use for ping.\n")
-	pingKey := keyboard.DetectKeyPress(keyboard.KeyNames)
-	fmt.Printf("Auto-ping enabled using [%s] key. Start aiming with right mouse button...\n", keyboard.KeyNames[pingKey])
+func loop(ctx context.Context, interval, hold time.Duration, mean, stdDev, minVal, maxVal float64) error {
+	pingKey, err := keyboard.DetectKeyPress(ctx, keyboard.KeyNames)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Auto-ping enabled using [%s]. Aim with the right mouse button.\n", keyboard.KeyNames[pingKey])
+	fmt.Println("Close the window or press Ctrl+C to exit.")
+	if err := keyboard.WaitReleased(ctx, pingKey); err != nil {
+		return err
+	}
 
-	// Generate a pool of delays to cycle through
-	delays := statistics.GenerateClickDelays(delaysCount, mean, stdDev, minVal, maxVal)
-	fmt.Printf("Generated %v human-like delays to be used in the loop.\n", delaysCount)
+	delays, err := timing.GenerateClickDelays(500, mean, stdDev, minVal, maxVal)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Generated %d jitter values.\n", len(delays))
 
-	// Graceful shutdown on Ctrl+C
-	fmt.Println("Close window or press Ctrl+C to exit")
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		<-sigChan
-		fmt.Println("\nExiting...")
-		os.Exit(0)
-	}()
-
-	// Infinite loop for the process
 	delayIndex := 0
-	var nextPingTime time.Time
+	next := func() time.Duration {
+		d := delays[delayIndex]
+		delayIndex = (delayIndex + 1) % len(delays)
+		return d
+	}
+
+	var nextPing time.Time
 	for {
-		if keyboard.IsKeyPressed(aimKey) {
+		if ctx.Err() != nil {
+			return nil
+		}
+		if keyboard.IsKeyPressed(keyboard.VKRightButton) {
 			now := time.Now()
-			if nextPingTime.IsZero() {
-				// RMB just pressed — first ping fires after a random delay only
-				nextPingTime = now.Add(delays[delayIndex])
-				delayIndex = (delayIndex + 1) % len(delays)
+			if nextPing.IsZero() {
+				nextPing = now.Add(next())
 			}
-			if now.After(nextPingTime) {
-				keyboard.PressKey(pingKey, 10*time.Millisecond)
-				// Subsequent pings at 1 second + random delay
-				nextPingTime = time.Now().Add(1*time.Second + delays[delayIndex])
-				delayIndex = (delayIndex + 1) % len(delays)
+			if !now.Before(nextPing) {
+				if err := keyboard.PressKey(pingKey, hold); err != nil {
+					fmt.Fprintf(os.Stderr, "input: %v\n", err)
+					if !app.Sleep(ctx, time.Second) {
+						return nil
+					}
+					continue
+				}
+				nextPing = time.Now().Add(interval + next())
 			}
-			time.Sleep(PollRateActive)
-		} else {
-			nextPingTime = time.Time{}
-			time.Sleep(PollRateIdle)
+			if !app.Sleep(ctx, 10*time.Millisecond) {
+				return nil
+			}
+			continue
+		}
+		nextPing = time.Time{}
+		if !app.Sleep(ctx, 200*time.Millisecond) {
+			return nil
 		}
 	}
 }
